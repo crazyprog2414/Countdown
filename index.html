@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Love @Dumpling</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0e0f13; --ink:#f7f7fb; --muted:#a7acbe; --card:#161821; --accent:#ff6aa6; --accent-2:#ffd4e6;
+    --good:#3ddc97; --warn:#ffd166; --danger:#ef476f;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Poppins,system-ui}
+  .wrap{min-height:100svh;display:grid;grid-template-rows:auto 1fr auto}
+  header{
+    position:relative; padding:22px clamp(16px,3vw,28px); display:flex; align-items:center; justify-content:space-between;
+    background: radial-gradient(1200px 600px at 12% -10%, rgba(255,106,166,.18), transparent),
+               radial-gradient(800px 500px at 90% 0%, rgba(255,212,230,.12), transparent);
+    border-bottom:1px solid rgba(255,255,255,.06);
+  }
+  .title{display:flex;gap:14px;align-items:center}
+  .logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#ff3f8a);
+        display:grid;place-items:center; box-shadow:0 10px 30px rgba(255,106,166,.35)}
+  .logo:before{content:"❤"; filter:drop-shadow(0 2px 6px rgba(0,0,0,.35))}
+  h1{font-size:clamp(18px,2.6vw,28px);margin:0;font-weight:800;letter-spacing:.3px}
+  .actions{display:flex;gap:10px}
+  button{all:unset;cursor:pointer;background:var(--accent);color:#111;padding:10px 14px;border-radius:12px;font-weight:700}
+  button.ghost{background:transparent;color:var(--ink);border:1px solid rgba(255,255,255,.14)}
+  main{padding:24px clamp(16px,3.2vw,28px); display:grid; gap:22px; grid-template-columns: 1fr;}
+  .grid{display:grid; gap:18px; grid-template-columns: repeat(12, 1fr)}
+  .card{grid-column: span 12; background:linear-gradient(180deg, #161821, #12131a); border:1px solid rgba(255,255,255,.06);
+        border-radius:18px; padding:18px; box-shadow:0 16px 50px rgba(0,0,0,.35)}
+  .card h3{margin:0 0 8px; font-size:clamp(14px,1.6vw,18px); color:var(--muted); font-weight:600}
+  .big{display:flex; flex-direction:column; gap:12px; align-items:center; justify-content:center; text-align:center; padding:26px}
+  .big .who{font-weight:700; font-size:clamp(16px,1.8vw,20px); color:var(--muted)}
+  .timer{font-variant-numeric:tabular-nums; font-weight:800; letter-spacing:1px; line-height:1.05}
+  .timer .line{font-size:clamp(26px,6vw,64px)}
+  .timer small{display:block; margin-top:10px; color:var(--muted); font-weight:600}
+  .chips{display:flex; gap:8px; flex-wrap:wrap; justify-content:center}
+  .chip{padding:6px 10px; border-radius:999px; background:#202231; color:var(--muted); font-weight:600; font-size:12px; border:1px solid rgba(255,255,255,.06)}
+  .kpis{display:grid; grid-template-columns: repeat(4, 1fr); gap:12px}
+  .kpi{background:#141622; border:1px solid rgba(255,255,255,.06); padding:12px; border-radius:14px; text-align:center}
+  .kpi .v{font-size:clamp(16px,3.6vw,34px); font-weight:800}
+  .kpi .l{font-size:12px; color:var(--muted)}
+  /* milestones */
+  .milestones{display:grid; grid-template-columns: repeat(12, 1fr); gap:14px}
+  .mile{grid-column: span 12; background:#151725; border:1px solid rgba(255,255,255,.06); padding:14px; border-radius:14px; display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:center}
+  .mile .name{font-weight:700}
+  .mile .when{color:var(--muted); font-size:12px}
+  .mile .due{font-weight:700}
+  .progress{height:8px; background:#0f1017; border-radius:999px; overflow:hidden; border:1px solid rgba(255,255,255,.06)}
+  .bar{height:100%; width:0%; background:linear-gradient(90deg,var(--accent),#ff3f8a)}
+  .tag{padding:4px 8px; border-radius:999px; font-size:12px; border:1px solid rgba(255,255,255,.16)}
+  .tag.next{background:rgba(255,106,166,.12); color:#ffd4e6; border-color:rgba(255,106,166,.35)}
+  /* footer */
+  footer{padding:18px; color:var(--muted); text-align:center; font-size:12px}
+  /* responsive */
+  @media (min-width: 860px){
+    .card.span-6{grid-column: span 6}
+    .card.span-8{grid-column: span 8}
+    .card.span-4{grid-column: span 4}
+    .mile{grid-column: span 6}
+  }
+  /* canvas confetti */
+  #fx{position:fixed; inset:0; pointer-events:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="title">
+      <div class="logo"></div>
+      <h1>Love @Dumpling</h1>
+    </div>
+    <div class="actions">
+      <button class="ghost" id="resetBtn">Reset</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="grid">
+      <article class="card span-8 big">
+        <div class="who" id="whoLbl">Apratim ❤ Dumpling</div>
+        <div class="timer" id="timer">
+          <div class="line" id="elapsedDHMS">—</div>
+          <small id="since">since —</small>
+        </div>
+        <div class="chips" id="chips"></div>
+      </article>
+
+      <article class="card span-4">
+        <h3>Quick Stats</h3>
+        <div class="kpis">
+          <div class="kpi"><div class="v" id="daysV">0</div><div class="l">Days together</div></div>
+          <div class="kpi"><div class="v" id="weeksV">0</div><div class="l">Weeks</div></div>
+          <div class="kpi"><div class="v" id="monthsV">0</div><div class="l">Months</div></div>
+          <div class="kpi"><div class="v" id="yearsV">0</div><div class="l">Years</div></div>
+        </div>
+      </article>
+
+      <article class="card">
+        <h3>Next Milestones</h3>
+        <div id="miles" class="milestones"></div>
+      </article>
+
+      <article class="card">
+        <h3>Today’s Little Love Note</h3>
+        <p id="note" style="font-weight:600; font-size:clamp(14px,1.8vw,18px); margin:.4rem 0 0"></p>
+      </article>
+    </section>
+  </main>
+
+  <footer>Built with ❤ for Day 6 — auto‑updates live every time she opens it.</footer>
+</div>
+<canvas id="fx"></canvas>
+
+<script>
+// ===== Utilities =====
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const pad = n => String(n).padStart(2,'0');
+const fmtDate = (d, tz) => new Intl.DateTimeFormat(undefined, {dateStyle:'long', timeStyle:'short', timeZone: tz}).format(d);
+const diffYMD = (from, to)=>{ // returns {y,m,d}
+  let y=to.getFullYear()-from.getFullYear();
+  let m=to.getMonth()-from.getMonth();
+  let d=to.getDate()-from.getDate();
+  if(d<0){
+    m--; const prevMonth = new Date(to.getFullYear(), to.getMonth(), 0).getDate();
+    d += prevMonth;
+  }
+  if(m<0){ m+=12; y--; }
+  return {y,m,d};
+};
+const localKey = 'loveTimer.v1';
+
+// Since when you liked her (March 2024)
+const likeSince = new Date(2024, 2, 1, 0, 0, 0); // 1 Mar 2024 local
+
+// ===== Fixed State =====
+let state = {
+  you:'Apratim', partner:'Dumpling', tz:'Asia/Kolkata',
+  // Relationship start: 23 Mar 2025 IST (stored in UTC)
+  start:'2025-03-22T18:30:00.000Z', preset:'ultra'
+};
+
+// Load previous (optional) — still allow persistence for counters
+(function load(){
+  try{ const raw = localStorage.getItem(localKey); if(raw){ state = {...state, ...JSON.parse(raw)}; }
+  }catch(e){}
+})();
+
+// ===== Elements =====
+const whoLbl = $('#whoLbl');
+const elapsedDHMS = $('#elapsedDHMS');
+const since = $('#since');
+const chips = $('#chips');
+const miles = $('#miles');
+const daysV = $('#daysV');
+const weeksV = $('#weeksV');
+const monthsV = $('#monthsV');
+const yearsV = $('#yearsV');
+const noteEl = $('#note');
+
+// ===== Note =====
+const notes = ['Waiting for our date at Barbeque Nation 🍽️❤️'];
+function pickNote(){ noteEl.textContent = notes[0]; }
+
+// ===== Milestones (only two): Next Oct 3, and Marriage (+7y) =====
+function nextOct3(now){
+  const y = now.getFullYear();
+  let target = new Date(y, 9, 3, 0, 0, 0); // Oct=9 (0-based), 3rd, 00:00 local
+  if(target < now) target = new Date(y+1, 9, 3, 0, 0, 0);
+  return target;
+}
+function buildMilestones(){
+  const arr = [];
+  if(!state.start) return arr;
+  const start = new Date(state.start);
+  const addYear = n=> new Date(start.getFullYear()+n, start.getMonth(), start.getDate(), start.getHours(), start.getMinutes());
+  const push = (label, when)=>{ if(when>new Date()) arr.push({label, when}); };
+  // 1) Next Oct 3
+  push('3rd October', nextOct3(new Date()));
+  // 2) Marriage (+7 years)
+  push('Our Marriage — waiting for us to be together officially, with love', addYear(7));
+  return arr.sort((a,b)=> a.when - b.when);
+}
+
+function renderMilestones(){
+  miles.innerHTML = '';
+  const all = buildMilestones();
+  if(!all.length){ miles.innerHTML = `<div class="tag">Milestones will appear here</div>`; return; }
+  const now = new Date();
+  all.forEach((m,i)=>{
+    const total = (m.when - new Date(state.start));
+    const done = (now - new Date(state.start));
+    const pct = Math.min(100, Math.max(0, Math.round(100 * done / Math.max(total,1))))
+    const wrap = document.createElement('div');
+    wrap.className = 'mile';
+    wrap.innerHTML = `
+      <div>
+        <div class="name">${m.label} ${i===0?'<span class="tag next">NEXT</span>':''}</div>
+        <div class="when">${fmtDate(m.when, state.tz)}</div>
+        <div class="progress" aria-label="progress to milestone"><div class="bar" style="width:${pct}%"></div></div>
+      </div>
+      <div style=\"text-align:right\">
+        <div class=\"due\">${formatCountdown(m.when)}</div>
+      </div>
+    `;
+    miles.appendChild(wrap);
+  });
+}
+
+function formatCountdown(target){
+  const ms = target - new Date();
+  if(ms<=0) return 'Today!';
+  const s = Math.floor(ms/1000);
+  const d = Math.floor(s/86400);
+  const h = Math.floor((s%86400)/3600);
+  const m = Math.floor((s%3600)/60);
+  const sec = s%60;
+  return `${d}d ${pad(h)}h ${pad(m)}m ${pad(sec)}s`;
+}
+
+// ===== Timer render =====
+function tick(){
+  if(!state.start){ elapsedDHMS.textContent='—'; since.textContent=''; return; }
+  const now = new Date();
+  const start = new Date(state.start);
+  const ms = now - start;
+  const s = Math.floor(ms/1000);
+  const d = Math.floor(s/86400);
+  const h = Math.floor((s%86400)/3600);
+  const m = Math.floor((s%3600)/60);
+  const sec = s%60;
+  elapsedDHMS.textContent = `${d} days ${pad(h)}:${pad(m)}:${pad(sec)}`;
+  since.textContent = `since ${fmtDate(start, state.tz)}`;
+  const ymd = diffYMD(start, now);
+  chips.innerHTML = '';
+  [['Years', ymd.y], ['Months', ymd.m], ['Days', ymd.d]].forEach(([k,v])=>{
+    const c = document.createElement('div'); c.className='chip'; c.textContent = `${v} ${k}`; chips.appendChild(c);
+  });
+  // Extra: how long I've liked you since Mar 2024
+  const ymdLike = diffYMD(likeSince, now);
+  const c2 = document.createElement('div'); c2.className='chip'; c2.textContent = `Liking you since Mar 2024 — ${ymdLike.y}y ${ymdLike.m}m ${ymdLike.d}d`;
+  chips.appendChild(c2);
+
+  daysV.textContent = d.toLocaleString();
+  weeksV.textContent = Math.floor(d/7).toLocaleString();
+  monthsV.textContent = (ymd.y*12 + ymd.m).toLocaleString();
+  yearsV.textContent = ymd.y.toLocaleString();
+  // Update countdown labels
+  $$('.mile .due').forEach((el,i)=>{
+    const all = buildMilestones(); if(all[i]) el.textContent = formatCountdown(all[i].when);
+  });
+}
+
+// ===== Confetti (simple) =====
+const fx = document.getElementById('fx');
+const ctx = fx.getContext('2d');
+let bits = [];
+function resize(){ fx.width = innerWidth; fx.height = innerHeight; }
+addEventListener('resize', resize); resize();
+function burst(){
+  const N = 150; bits = [];
+  for(let i=0;i<N;i++) bits.push({ x: Math.random()*fx.width, y: -10, vy: 2+Math.random()*4, vx: (Math.random()-.5)*3, r: 2+Math.random()*4, a:1 });
+  let t=0;
+  (function anim(){
+    ctx.clearRect(0,0,fx.width,fx.height);
+    bits.forEach(b=>{ b.x += b.vx; b.y += b.vy; b.vy += 0.05; b.a -= 0.005; ctx.globalAlpha=Math.max(0,b.a); ctx.fillStyle = ['#ff6aa6','#ffd4e6','#ffffff','#3ddc97'][Math.floor(Math.random()*4)]; ctx.fillRect(b.x,b.y,b.r,b.r); });
+    ctx.globalAlpha=1; t++;
+    if(t<600 && bits.some(b=>b.a>0)) requestAnimationFrame(anim);
+  })();
+}
+
+function milestoneWatcher(){
+  const all = buildMilestones(); if(!all.length) return;
+  const now = Date.now();
+  const justHit = all.find(m=> Math.abs(+m.when - now) < 1100);
+  if(justHit) burst();
+}
+
+// ===== Header actions =====
+$('#resetBtn').onclick = ()=>{ localStorage.removeItem(localKey); location.reload(); };
+
+function applyState(){
+  whoLbl.textContent = `${state.you} ❤ ${state.partner}`;
+  pickNote();
+  renderMilestones();
+  clearInterval(window.__timer); clearInterval(window.__watcher);
+  tick();
+  window.__timer = setInterval(tick, 1000);
+  window.__watcher = setInterval(milestoneWatcher, 1000);
+}
+
+// init
+(function init(){
+  // Save defaults so it persists even without setup
+  localStorage.setItem(localKey, JSON.stringify(state));
+  applyState();
+})();
+</script>
+</body>
+</html>
